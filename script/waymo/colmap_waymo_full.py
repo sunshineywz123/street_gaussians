@@ -108,13 +108,22 @@ def run_colmap_waymo(result):
             flip_mask = (255 - mask).astype(np.uint8)
             cv2.imwrite(new_mask_filename, flip_mask)
     
+    print(f'colmap feature_extractor \
+            --ImageReader.mask_path {mask_images_dir} \
+            --ImageReader.camera_model SIMPLE_PINHOLE  \
+            --ImageReader.single_camera_per_folder 1 \
+            --database_path {colmap_dir}/database.db \
+            --image_path {train_images_dir} \
+            --SiftExtraction.use_gpu 0')
+    
     # https://colmap.github.io/faq.html#mask-image-regions
     os.system(f'colmap feature_extractor \
             --ImageReader.mask_path {mask_images_dir} \
             --ImageReader.camera_model SIMPLE_PINHOLE  \
             --ImageReader.single_camera_per_folder 1 \
             --database_path {colmap_dir}/database.db \
-            --image_path {train_images_dir}')
+            --image_path {train_images_dir} \
+            --SiftExtraction.use_gpu 0')
 
     # load intrinsic
     camera_infos = dict()
@@ -256,11 +265,36 @@ def run_colmap_waymo(result):
     with open(rigid_config_path, "w+") as f:
         json.dump([cam_rigid], f, indent=4)   
 
-    os.system(f'colmap exhaustive_matcher \
-            --database_path {colmap_dir}/database.db')
-
+    print(f'colmap sequential_matcher \
+            --database_path {colmap_dir}/database.db \
+            --SiftMatching.use_gpu 0')
+    
+    # os.system(f'colmap exhaustive_matcher \
+    #         --database_path {colmap_dir}/database.db \
+    #         --SiftMatching.use_gpu 0')
+    os.system(f'colmap sequential_matcher \
+            --database_path {colmap_dir}/database.db \
+            --SiftMatching.use_gpu 0')
+    
     triangulated_dir = os.path.join(colmap_dir, 'triangulated/sparse/model')
     os.makedirs(triangulated_dir, exist_ok=True)
+    print(f'colmap point_triangulator \
+            --database_path {colmap_dir}/database.db \
+            --image_path {train_images_dir} \
+            --input_path {model_dir} \
+            --output_path {triangulated_dir} \
+            --Mapper.ba_refine_focal_length 0 \
+            --Mapper.ba_refine_principal_point 0 \
+            --Mapper.max_extra_param 0 \
+            --clear_points 0 \
+            --Mapper.ba_global_max_num_iterations 30 \
+            --Mapper.filter_max_reproj_error 4 \
+            --Mapper.filter_min_tri_angle 0.5 \
+            --Mapper.tri_min_angle 0.5 \
+            --Mapper.tri_ignore_two_view_tracks 1 \
+            --Mapper.tri_complete_max_reproj_error 4 \
+            --Mapper.tri_continue_max_angle_error 4')
+    
     os.system(f'colmap point_triangulator \
         --database_path {colmap_dir}/database.db \
         --image_path {train_images_dir} \
@@ -279,6 +313,17 @@ def run_colmap_waymo(result):
         --Mapper.tri_continue_max_angle_error 4')
     
     if cfg.data.use_colmap_pose:
+        print(f'colmap rig_bundle_adjuster \
+                --input_path {triangulated_dir} \
+                --output_path {triangulated_dir} \
+                --rig_config_path {rigid_config_path} \
+                --estimate_rig_relative_poses 0 \
+                --RigBundleAdjustment.refine_relative_poses 1 \
+                --BundleAdjustment.max_num_iterations 50 \
+                --BundleAdjustment.refine_focal_length 0 \
+                --BundleAdjustment.refine_principal_point 0 \
+                --BundleAdjustment.refine_extra_params 0')
+    
         # May lead to unstable results when refining relative poses
         os.system(f'colmap rig_bundle_adjuster \
                 --input_path {triangulated_dir} \

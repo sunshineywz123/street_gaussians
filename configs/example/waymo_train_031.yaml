@@ -8,7 +8,7 @@ data:
   type: Waymo
   white_background: false
   selected_frames: [0, 198]
-  cameras: [0, 1, 2]
+  cameras: [0, 1, 2,3,4]
   extent: 10
   use_colmap: true
   filter_colmap: true

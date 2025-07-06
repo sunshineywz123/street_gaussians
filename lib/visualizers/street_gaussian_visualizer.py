@@ -33,6 +33,7 @@ class StreetGaussianVisualizer():
 
             
     def visualize(self, result, camera: Camera):
+        # import ipdb; ipdb.set_trace()
         self.cams.append(camera.meta['cam'])
         name = camera.image_name
         
@@ -140,6 +141,7 @@ class StreetGaussianVisualizer():
         if len(frames) == 0:
             return
         
+        # 获取所有唯一的相机ID并排序
         unqiue_cams = sorted(list(set(self.cams)))
         if len(unqiue_cams) == 1:
             if visualize_func is not None:
@@ -147,7 +149,8 @@ class StreetGaussianVisualizer():
             imageio.mimwrite(os.path.join(self.result_dir, f'{name}.mp4'), frames, fps=cfg.render.fps)
         else:
             concat_cameras = cfg.render.get('concat_cameras', [])
-            if len(concat_cameras) == len(unqiue_cams):
+            # if len(concat_cameras) == len(unqiue_cams):
+            if 0:
                 frames_cam_all = []
                 for cam in concat_cameras:
                     frames_cam = [frame for frame, c in zip(frames, self.cams) if c == cam]
@@ -184,8 +187,16 @@ class StreetGaussianVisualizer():
         if cfg.render.get('save_video', True):
             self.save_video_from_frames(self.rgbs_gt, 'color_gt')
             self.save_video_from_frames(self.rgbs, 'color')
-            self.save_video_from_frames(self.rgbs_bkgd, 'color_bkgd')
-            self.save_video_from_frames(self.rgbs_obj, 'color_obj')
-            self.save_video_from_frames(self.accs_obj, 'acc_obj')
-            self.save_video_from_frames(self.depths, 'depth', visualize_func=self.depth_visualize_func)
-            self.save_video_from_frames(self.diffs, 'diff', visualize_func=self.diff_visualize_func)
+            # self.save_video_from_frames(self.rgbs_bkgd, 'color_bkgd')
+            # self.save_video_from_frames(self.rgbs_obj, 'color_obj')
+            # self.save_video_from_frames(self.accs_obj, 'acc_obj')
+            # self.save_video_from_frames(self.depths, 'depth', visualize_func=self.depth_visualize_func)
+            # self.save_video_from_frames(self.diffs, 'diff', visualize_func=self.diff_visualize_func)
+
+            # save_video_from_frames(self,self.rgbs_gt, 'color_gt')
+            # save_video_from_frames(self,self.rgbs, 'color')
+            # save_video_from_frames(self,self.rgbs_bkgd, 'color_bkgd')
+            # save_video_from_frames(self,self.rgbs_obj, 'color_obj')
+            # save_video_from_frames(self,self.accs_obj, 'acc_obj')
+            # save_video_from_frames(self,self.depths, 'depth', visualize_func=self.depth_visualize_func)
+            # save_video_from_frames(self,self.diffs, 'diff', visualize_func=self.diff_visualize_func)

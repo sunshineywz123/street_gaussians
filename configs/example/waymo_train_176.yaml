@@ -1,13 +1,13 @@
 task: waymo_full_exp
-source_path: ./data/waymo/training/002
-exp_name: waymo_train_002
+source_path: ./data/waymo/training/176
+exp_name: waymo_train_176
 
 data:
   split_test: -1
   split_train: 1
   type: Waymo
   white_background: false
-  selected_frames: [98, 198]
+  selected_frames: [0, 197]
   cameras: [0, 1, 2,3,4]
   extent: 10
   use_colmap: true
@@ -75,4 +75,4 @@ optim:
 
 render:
   fps: 24
-  concat_cameras: [1, 0, 2]
+  concat_cameras: [3,1, 0, 2,4]

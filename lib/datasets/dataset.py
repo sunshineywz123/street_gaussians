@@ -23,6 +23,7 @@ class Dataset():
 
         self.train_cameras = {}
         self.test_cameras = {}
+        self.novel_view_cameras = {}
 
         dataset_type = cfg.data.get('type', "Colmap")
         assert dataset_type in sceneLoadTypeCallbacks.keys(), 'Could not recognize scene type!'
@@ -40,6 +41,8 @@ class Dataset():
                 camlist.extend(scene_info.test_cameras)
             if scene_info.train_cameras:
                 camlist.extend(scene_info.train_cameras)
+            if scene_info.novel_view_cameras:
+                camlist.extend(scene_info.novel_view_cameras)
             for id, cam in enumerate(camlist):
                 json_cams.append(camera_to_JSON(id, cam))
 
@@ -52,10 +55,13 @@ class Dataset():
         if self.cfg.shuffle and cfg.mode == 'train':
             random.shuffle(self.scene_info.train_cameras)  # Multi-res consistent random shuffling
             random.shuffle(self.scene_info.test_cameras)  # Multi-res consistent random shuffling
+            random.shuffle(self.scene_info.novel_view_cameras)  # Multi-res consistent random shuffling
         
         for resolution_scale in cfg.resolution_scales:
             print("Loading Training Cameras")
             self.train_cameras[resolution_scale] = cameraList_from_camInfos(self.scene_info.train_cameras, resolution_scale)
             print("Loading Test Cameras")
             self.test_cameras[resolution_scale] = cameraList_from_camInfos(self.scene_info.test_cameras, resolution_scale)
+            print("Loading Novel View Cameras")
+            self.novel_view_cameras[resolution_scale] = cameraList_from_camInfos(self.scene_info.novel_view_cameras, resolution_scale)
             

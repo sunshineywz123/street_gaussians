@@ -11,6 +11,10 @@ from lib.config import cfg
 from lib.visualizers.base_visualizer import BaseVisualizer as Visualizer
 from lib.visualizers.street_gaussian_visualizer import StreetGaussianVisualizer
 import time
+import ptvsd
+if 0:
+    ptvsd.enable_attach(address=('0.0.0.0', 5678))
+    ptvsd.wait_for_attach()
 
 def render_sets():
     cfg.render.save_image = True
@@ -75,7 +79,9 @@ def render_trajectory():
         
         train_cameras = scene.getTrainCameras()
         test_cameras = scene.getTestCameras()
-        cameras = train_cameras + test_cameras
+        novel_view_cameras = scene.getNovelViewCameras()
+        # cameras = train_cameras + test_cameras
+        cameras=novel_view_cameras
         cameras = list(sorted(cameras, key=lambda x: x.id))
 
         for idx, camera in enumerate(tqdm(cameras, desc="Rendering Trajectory")):

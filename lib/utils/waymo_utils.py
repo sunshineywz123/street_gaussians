@@ -444,6 +444,7 @@ def generate_dataparser_outputs(
     # run colmap
     colmap_basedir = os.path.join(f'{cfg.model_path}/colmap')
     if not os.path.exists(os.path.join(colmap_basedir, 'triangulated/sparse/model')):
+    # if 1:
         from script.waymo.colmap_waymo_full import run_colmap_waymo
         run_colmap_waymo(result)
     

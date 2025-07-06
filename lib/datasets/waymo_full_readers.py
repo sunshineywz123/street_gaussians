@@ -11,6 +11,7 @@ import cv2
 import sys
 import copy
 import shutil
+from lib.utils.rotate_extrinsic import rotate_extrinsic
 sys.path.append(os.getcwd())
 
 def readWaymoFullInfo(path, images='images', split_train=-1, split_test=-1, **kwargs):
@@ -48,7 +49,7 @@ def readWaymoFullInfo(path, images='images', split_train=-1, split_test=-1, **kw
         datadir=path, 
         selected_frames=selected_frames,
         build_pointcloud=build_pointcloud,
-        cameras=cfg.data.get('cameras', [0, 1, 2]),
+        cameras=cfg.data.get('cameras', [0, 1, 2,3,4]),
     )
 
     exts = output['exts']
@@ -161,12 +162,23 @@ def readWaymoFullInfo(path, images='images', split_train=-1, split_test=-1, **kw
     train_cam_infos = [cam_info for cam_info in cam_infos if not cam_info.metadata['is_val']]
     test_cam_infos = [cam_info for cam_info in cam_infos if cam_info.metadata['is_val']]
     
-    for cam in cfg.data.get('cameras', [0, 1, 2]):
+    for cam in cfg.data.get('cameras', [0, 1, 2,3,4]):
         camera_timestamps[cam]['train_timestamps'] = sorted(camera_timestamps[cam]['train_timestamps'])
         camera_timestamps[cam]['test_timestamps'] = sorted(camera_timestamps[cam]['test_timestamps'])
     scene_metadata['camera_timestamps'] = camera_timestamps
         
+    # novel_view_cam_infos = []
+    # 创建新视角相机
+    print('making novel view cameras')
     novel_view_cam_infos = []
+
+
+    # 遍历train_cam_infos，每个相机都生成一个新视角相机
+    for cam_info in train_cam_infos:
+        novel_view_cam_info=copy.deepcopy(cam_info)
+        # 生成新视角相机
+        novel_view_cam_info = rotate_extrinsic(novel_view_cam_info, 0, 'z')
+        novel_view_cam_infos.append(novel_view_cam_info)
     
     #######################################################################################################################3
     # Get scene extent
